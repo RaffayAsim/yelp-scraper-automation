@@ -1324,9 +1324,8 @@ async function runScrapeJob(jobId) {
       progress: 10
     });
 
-    const customProxyExtPath = path.join(__dirname, 'CustomProxyExtension');
     const launchArgs = [
-      `--load-extension=${EXTENSION_PATH},${customProxyExtPath}`,
+      `--load-extension=${EXTENSION_PATH}`,
       '--no-sandbox',
       '--disable-setuid-sandbox',
       '--start-maximized',
@@ -1362,7 +1361,7 @@ async function runScrapeJob(jobId) {
 
     // Always use a single platform-locked controlled tab.
     const page = await getOrCreatePlatformLockedPage(browser, job.platform);
-    console.log('[launch] Waiting 8 seconds for extension and proxy to initialize...');
+    console.log('[launch] Waiting 8 seconds for extension to initialize...');
     await page.waitForTimeout(8000);
 
     const searchUrl = buildSearchUrl(job);
@@ -1430,7 +1429,7 @@ async function runScrapeJob(jobId) {
       phase: `Waiting for ${label} and extension UI to settle`,
       progress: 25
     });
-    // Allow 10 seconds for the extension and proxy tunnel to settle
+    // Allow 10 seconds for the extension to settle
     const settleMs = 10000;
     await page.waitForTimeout(settleMs);
 
