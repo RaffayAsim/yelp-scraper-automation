@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Yelp Scraper",
+    "description": "O nome da extensão."
+  },
+  "extDesc": {
+    "message": "Um clique para extrair dados de negócios locais do Yelp.com e exportar leads para arquivos CSV.",
+    "description": "A descrição da extensão."
+  }
+}

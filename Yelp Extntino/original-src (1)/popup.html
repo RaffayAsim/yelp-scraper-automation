@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>popup</title>
+    <link href="css/style.css" rel="stylesheet" />
+    <link href="css/contentScript.css" rel="stylesheet" />
+    <script src="lib/fetch.umd.js"></script>
+    <script src="lib/jquery-3.1.1.min.js"></script>
+    <script src="lib/axios.min.js"></script>
+    <script src="js/util.js"></script>
+</head>
+
+<body>
+    <div id="maincontent" style="width: 100%">
+        <div id="content">
+            <div style="
+            padding: 0;
+            display: flex;
+            flex-direction: row;
+            height: 50px;
+            align-items:flex-start;
+            text-align: center;
+            justify-content: space-between;
+          ">
+                <h2 style="text-align: left;">Leads Scraper</h2>
+                                <span id="loginbtn" style="margin: 8px; font-weight: 600;">Ready</span>
+            </div>
+            <div style="
+            padding: 5px 0;
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            align-items: center;
+            justify-content:flex-end;
+            gap: 10px;
+            border-bottom: 1px solid #cccccc;
+            margin-bottom: 10px;
+          ">
+                <div><span id="accountinfo" style="font-weight: bold; font-size: 16px;"></span></div>
+            </div>
+            <div style="
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: left;
+            gap: 20px;
+            row-gap: 20px;
+            
+            height: 200px;
+          ">
+                <div style="display: flex; align-items:center; justify-content:flex-start; flex-direction: row; gap: 20px;">
+                    <label for="country" style="font-weight: bold;">Choose Sites:</label>
+                    <select id="country" name="country">
+                        <option value="www.yelp.com" selected>English (United States)</option>
+                        <option value="www.yelp.co.uk">English (United Kingdom)</option>
+                        <option value="www.yelp.ca">English (Canada)</option>
+                        <option value="www.yelp.com.au">English (Australia)</option>
+                        <option value="www.yelp.co.nz">English (New Zealand)</option>
+                        <option value="en.yelp.ch">English (Switzerland)</option>
+                        <option value="www.yelp.com.sg">English (Singapore)</option>
+                        <option value="en.yelp.be">English (Belgium)</option>
+                        
+                        <option value="en.yelp.com.hk">English (Hong Kong)</option>
+                        <option value="en.yelp.my">English (Malaysia)</option>
+                        
+                        <option value="en.yelp.com.ph">English (Philippines)</option>
+                        <option value="www.yelp.ie">English (Republic of Ireland)</option>
+                        
+                       
+                        
+                        
+
+                        <option value="ms.yelp.my">Bahasa Malaysia (Malaysia)</option>
+                        <option value="www.yelp.cz">Čeština (Česká republika)</option>
+                        <option value="www.yelp.dk">Dansk (Danmark)</option>
+                        <option value="www.yelp.de">Deutsch (Deutschland)</option>
+                        <option value="www.yelp.at">Deutsch (Österreich)</option>
+                        <option value="de.yelp.ch">Deutsch (Schweiz)</option>
+                       
+                        <option value="www.yelp.com.ar">Español (Argentina)</option>
+                        <option value="www.yelp.cl">Español (Chile)</option>
+                        <option value="www.yelp.es">Español (España)</option>
+                        <option value="www.yelp.com.mx">Español (México)</option>
+                        <option value="fil.yelp.com.ph">Filipino (Pilipinas)</option>
+                        <option value="fr.yelp.be">Français (Belgique)</option>
+                        <option value="fr.yelp.ca">Français (Canada)</option>
+                        <option value="www.yelp.fr">Français (France)</option>
+                        <option value="fr.yelp.ch">Français (Suisse)</option>
+                        <option value="www.yelp.it">Italiano (Italia)</option>
+                        <option value="it.yelp.ch">Italiano (Svizzera)</option>
+                        <option value="nl.yelp.be">Nederlands (België)</option>
+                        <option value="www.yelp.nl">Nederlands (Nederland)</option>
+                        <option value="www.yelp.no">Norsk (Norge)</option>
+                        <option value="www.yelp.pl">Polski (Polska)</option>
+                        <option value="www.yelp.com.br">Português (Brasil)</option>
+                        <option value="www.yelp.pt">Português (Portugal)</option>
+                        <option value="fi.yelp.fi">Suomi (Suomi)</option>
+                        <option value="sv.yelp.fi">Svenska (Finland)</option>
+                        <option value="www.yelp.se">Svenska (Sverige)</option>
+                        <option value="www.yelp.com.tr">Türkçe (Türkiye)</option>
+                        <option value="www.yelp.co.jp">日本語 (日本)</option>
+                        <option value="www.yelp.com.tw">繁體中文 (台灣)</option>
+                        <option value="zh.yelp.com.hk">繁體中文 (香港)</option>
+                    </select>
+                    <button id="addprofilebtn" style="background-color:darkgreen; color: #fff;" class="extension_gms_button">Open Website</button>
+                </div>
+                <div>
+                    <ul>
+                        <li><a id="demo_link" style="text-decoration: underline; color: cadetblue; font-size: 14px; margin: 5px 0px ; " href=""> Demo Data</a></li>
+                        <li> <a id="demo_video" style="text-decoration: underline; font-size: 14px; color: cadetblue; margin: 5px 0px ;" href="">Video Showcase</a></li>
+                    </ul>
+                </div>
+                <!-- <div>
+                    <h3>Scraper Settings: </h3>
+                    <div style="vertical-align: middle; height: 30px; padding: 0px 0">
+                        <input type='checkbox' id="collect_phone_cb"><label for="collect_phone_cb">Extract Phones from Detail Pages If not Exist in List Pages. (Pro Only)</label>
+                    </div>
+                    <div style="vertical-align: middle; height: 30px; padding: 0px 0">
+                        <input type='checkbox' id="collect_email_cb"><label for="collect_email_cb">Extract emails, social media links from Business Websites. (Pro Only)</label>
+                    </div>
+                </div> -->
+            </div>
+
+            <hr />
+            <div>
+                <a href="https://forms.gle/K5jmbN1yQ6jvKcNv7" target="_blank">
+                    <h3>Any Suggestions? Feel free to contact us!</h3>
+                </a>
+            </div>
+            <div id="managesubscription">
+                
+            </div>
+        </div>
+    </div>
+</body>
+<script src="js/popup.js"></script>
+
+</html>

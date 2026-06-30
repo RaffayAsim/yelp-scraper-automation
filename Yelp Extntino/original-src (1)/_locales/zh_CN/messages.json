@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Yelp 爬虫",
+    "description": "扩展名。"
+  },
+  "extDesc": {
+    "message": "一键从Yelp.com提取本地商家数据并将潜在客户导出为CSV文件。",
+    "description": "扩展的描述。"
+  }
+}

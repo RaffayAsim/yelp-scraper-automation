@@ -1,0 +1,10 @@
+{
+    "extName": {
+        "message": "Ye Scraper: Business Leads Extractor",
+        "description": "The extension name."
+    },
+    "extDesc": {
+        "message": "One click to extract Local Business Data from Yelp and export leads to CSV files.",
+        "description": "The description of extension."
+    }
+}

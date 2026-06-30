@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Yelp Scraper",
+    "description": "Jina la programu."
+  },
+  "extDesc": {
+    "message": "Bonyeza moja kuchukua data ya biashara za mitaa kutoka Yelp.com na kuuza miongozo kwa faili za CSV.",
+    "description": "Maelezo ya programu."
+  }
+}

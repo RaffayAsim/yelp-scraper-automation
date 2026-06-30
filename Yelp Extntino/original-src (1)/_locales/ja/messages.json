@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Yelp スクレイパー",
+    "description": "拡張機能の名前。"
+  },
+  "extDesc": {
+    "message": "Yelp.com からローカルビジネスデータを抽出し、リードをCSVファイルにエクスポートするためのワンクリック。",
+    "description": "拡張機能の説明。"
+  }
+}

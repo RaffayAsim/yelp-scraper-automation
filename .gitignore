@@ -1,0 +1,9 @@
+node_modules/
+.env
+.chrome-profile/
+.chrome-profile-original/
+debug/
+exports/
+node-bin/
+*.log
+timings.json

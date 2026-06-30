@@ -1,0 +1,7 @@
+function capitalizeFirstLetter(a){return a.charAt(0).toUpperCase()+a.slice(1)}var table=newTabulator("#example-table",{layout:"fitData",placeholder:"Loading",selectable:1,downloadConfig:{undefinedString:""}});
+document.getElementById("download-csv").addEventListener("click",function(){table.download("csv","results.csv")});
+document.getElementById("download-xlsx").addEventListener("click",function(){table.download("xlsx","results.xlsx",{sheetName:"My Data"})});
+function flattenObject(a,b=""){const d={};for(const [c,e]of Object.entries(a))a=b?`${b}_${c}`:c,"object"===typeof e&&null!==e?Object.assign(d,flattenObject(e,a)):d[a]=null===e?"":e;return d}
+function generateColumns(a){const b=new Set("name phone address email website instagram facebook twitter linkedin youtube businessUrl rating reviewCount priceRange longitude latitude categories serviceArea".split(" "));var d=[];b.forEach(c=>{d.push({title:capitalizeFirstLetter(c),field:c,width:300,resizable:!0})});Array.from(a).sort().forEach(c=>{b.has(c)||d.push({title:capitalizeFirstLetter(c),field:c,width:300,resizable:!0})});table.setColumns(d)}
+function showData(){chrome.storage.local.get(null,function(a){a=a.leads||[];for(var b=new Set,d=[],c=0;c<a.length;++c){const e=flattenObject(a[c]);d.push(e);Object.keys(e).forEach(f=>b.add(f))}generateColumns(b);table.setData(d)})}function normalizeProfileId(a){return a.replace("@","").trim().toLowerCase()}
+$(document).ready(function(){showData();document.getElementById("accountinfo").innerHTML="No login required"});

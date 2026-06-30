@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Yelp Scraper",
+    "description": "Tên tiện ích mở rộng."
+  },
+  "extDesc": {
+    "message": "Nhấp chuột để trích xuất dữ liệu Doanh nghiệp Địa phương từ Yelp.com và xuất khách hàng tiềm năng ra tệp CSV.",
+    "description": "Mô tả của tiện ích mở rộng."
+  }
+}

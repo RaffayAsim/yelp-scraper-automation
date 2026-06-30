@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Yelp 스크레이퍼",
+    "description": "확장 프로그램의 이름입니다."
+  },
+  "extDesc": {
+    "message": "Yelp.com에서 지역 비즈니스 데이터를 추출하고 리드를 CSV 파일로 내보내는 데 한 번의 클릭만 필요합니다.",
+    "description": "확장 프로그램의 설명입니다."
+  }
+}

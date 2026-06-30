@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: yelp-scraper-automation
+    runtime: docker
+    plan: free
+    autoDeploy: true
+    healthCheckPath: /
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: NODE_ENV
+        value: production
+      - key: EXTENSION_PATH
+        value: /app/yelp-extension/original-src
+      - key: CHROME_USER_DATA_DIR
+        value: /data/chrome-profile
+      - key: EXPORTS_DIR
+        value: /data/exports
+      - key: DEBUG_DIR
+        value: /app/debug

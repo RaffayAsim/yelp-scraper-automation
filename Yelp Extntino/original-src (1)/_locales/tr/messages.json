@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Yelp Scraper",
+    "description": "Uzantı adı."
+  },
+  "extDesc": {
+    "message": "Yelp.com'dan Yerel İşletme Verilerini çıkarmak ve potansiyel müşterileri CSV dosyalarına aktarmak için tek tıklama.",
+    "description": "Uzantı açıklaması."
+  }
+}
