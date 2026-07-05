@@ -7,3 +7,5 @@ exports/
 node-bin/
 *.log
 timings.json
+*.crx
+*.zip
