@@ -1,3 +1,13 @@
+---
+title: Yelp Scraper Automation
+emoji: 🚀
+colorFrom: blue
+colorTo: purple
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # Yelp Lead Scraper Automation
 
 Automated lead generation from Yelp with extension-based scraping, Excel export, and time estimation.
