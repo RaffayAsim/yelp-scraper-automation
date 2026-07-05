@@ -38,12 +38,19 @@ RUN which chromium && chromium --version
 
 WORKDIR /app
 
+# Create necessary directories and set ownership before switching user
+RUN mkdir -p /data/chrome-profile /data/exports /app/debug && \
+    chown -R node:node /data /app
+
+# Switch to the non-root node user (UID 1000)
+USER node
+
 # Install dependencies first (layer caching)
-COPY package*.json ./
+COPY --chown=node:node package*.json ./
 RUN npm ci --omit=dev
 
 # Copy application files
-COPY . .
+COPY --chown=node:node . .
 
 # Rename extension folder to remove the space (avoids Linux --load-extension path issues)
 RUN mv "/app/Yelp Extntino" /app/yelp-extension
@@ -51,11 +58,6 @@ RUN mv "/app/Yelp Extntino" /app/yelp-extension
 # Make start script executable
 RUN chmod +x /app/start.sh
 
-# Persistent data lives on a Fly volume mounted at /data
-# - /data/chrome-profile  → Chrome user profile
-# - /data/exports         → Downloaded lead files
-RUN mkdir -p /data/chrome-profile /data/exports /app/debug
-
-EXPOSE 3000
+EXPOSE 7860
 
 CMD ["/app/start.sh"]
