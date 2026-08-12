@@ -133,12 +133,38 @@ function normalizePlatformInput(rawPlatform, rawDomain = '') {
     return 'facebook_pages';
   }
 
+  if (
+    platform === 'kickstarter' ||
+    platform === 'kickstarter_authors' ||
+    platform === 'kickstarter authors' ||
+    platform === 'ks'
+  ) {
+    return 'kickstarter';
+  }
+
+  if (
+    platform === 'apollo' ||
+    platform === 'apollo_io' ||
+    platform === 'apollo io' ||
+    platform === 'apollo.io'
+  ) {
+    return 'apollo';
+  }
+
   if (domain.includes('google.')) {
     return 'google_maps';
   }
 
   if (domain.includes('facebook.')) {
     return 'facebook_pages';
+  }
+
+  if (domain.includes('kickstarter.')) {
+    return 'kickstarter';
+  }
+
+  if (domain.includes('apollo.io') || domain.includes('apollo.')) {
+    return 'apollo';
   }
 
   return 'yelp';
@@ -155,6 +181,14 @@ function normalizeSearchDomain(platform, rawDomain) {
   if (platform === 'facebook_pages') {
     // Use the logged-in Chrome profile to access Facebook search directly.
     return 'www.facebook.com';
+  }
+
+  if (platform === 'kickstarter') {
+    return 'www.kickstarter.com';
+  }
+
+  if (platform === 'apollo') {
+    return 'app.apollo.io';
   }
 
   return input || 'www.yelp.com';
@@ -207,6 +241,14 @@ function buildSearchUrl(job) {
     return `https://www.facebook.com/search/pages/?q=${encodeURIComponent(query)}`;
   }
 
+  if (platform === 'kickstarter') {
+    return `https://${domain}/projects/search?term=${encodeURIComponent(job.keyword)}&category_id=18`;
+  }
+
+  if (platform === 'apollo') {
+    return `https://${domain}/#/people?qKeywords=${encodeURIComponent(job.keyword)}`;
+  }
+
   return `https://${domain}/search?find_desc=${encodeURIComponent(job.keyword)}&find_loc=${encodeURIComponent(job.location)}`;
 }
 
@@ -252,12 +294,20 @@ function isPlatformUrl(url, platform) {
   if (platform === 'facebook_pages') {
     return u.includes('facebook.com/') || u.includes('bing.com/search') || u.includes('google.com/search');
   }
+  if (platform === 'kickstarter') {
+    return u.includes('kickstarter.com');
+  }
+  if (platform === 'apollo') {
+    return u.includes('apollo.io');
+  }
   return u.includes('yelp.');
 }
 
 function platformLabel(platform) {
   if (platform === 'google_maps') return 'Google Maps';
   if (platform === 'facebook_pages') return 'Facebook Pages';
+  if (platform === 'kickstarter') return 'Kickstarter';
+  if (platform === 'apollo') return 'Apollo';
   return 'Yelp';
 }
 
@@ -475,7 +525,13 @@ function normalizeLead(lead) {
     reviews: lead.reviews || lead.reviewCount || '',
     website: normalizeWebsiteValue(lead.website || lead.url || ''),
     latitude: lead.latitude || lead.lat || '',
-    longitude: lead.longitude || lead.lng || ''
+    longitude: lead.longitude || lead.lng || '',
+    facebook: lead.facebook || '',
+    instagram: lead.instagram || '',
+    twitter: lead.twitter || '',
+    linkedin: lead.linkedin || '',
+    youtube: lead.youtube || '',
+    bookTitle: lead.bookTitle || ''
   };
 }
 
@@ -486,7 +542,8 @@ function toPreviewRows(leads) {
     address: lead.address || '',
     phone: lead.phone || '',
     email: lead.email || '',
-    website: lead.website || ''
+    website: lead.website || '',
+    bookTitle: lead.bookTitle || ''
   }));
 }
 
@@ -1301,16 +1358,16 @@ async function runScrapeJob(jobId) {
   // Keep Yelp on a long-lived profile.
   // Use a fresh per-job profile only for Google Maps to avoid webhp/session-restore issues.
   // Use a dedicated persistent profile for Facebook so manual login cookies persist across runs.
-  const primaryProfileDir = (job.platform === 'google_maps' || job.platform === 'yelp')
+  const primaryProfileDir = (job.platform === 'google_maps' || job.platform === 'yelp' || job.platform === 'kickstarter' || job.platform === 'apollo')
     ? path.join(CHROME_USER_DATA_DIR, 'sessions', job.id)
     : job.platform === 'facebook_pages'
     ? FACEBOOK_PROFILE_DIR
     : CHROME_USER_DATA_DIR;
-  if (job.platform === 'google_maps' || job.platform === 'yelp') {
+  if (job.platform === 'google_maps' || job.platform === 'yelp' || job.platform === 'kickstarter' || job.platform === 'apollo') {
     fs.mkdirSync(primaryProfileDir, { recursive: true });
   }
   const yelpFallbackProfileDir = path.join(CHROME_USER_DATA_DIR, 'yelp-fallback', job.id);
-  const launchProfileCandidates = (job.platform === 'google_maps' || job.platform === 'yelp')
+  const launchProfileCandidates = (job.platform === 'google_maps' || job.platform === 'yelp' || job.platform === 'kickstarter' || job.platform === 'apollo')
     ? [primaryProfileDir]
     : job.platform === 'facebook_pages'
     ? [primaryProfileDir]
@@ -1584,14 +1641,32 @@ async function runScrapeJob(jobId) {
     let lastLiveSignature = '';
     let loopCount = 0;
 
+    let lastDebugMsg = '';
     while (!completionDetected) {
       await page.waitForTimeout(1500);
       loopCount += 1;
 
+      try {
+        const logs = await page.evaluate(() => {
+          const el = document.documentElement;
+          const attr = el.getAttribute('data-yscraper-logs');
+          if (attr) {
+            el.removeAttribute('data-yscraper-logs');
+            return JSON.parse(attr);
+          }
+          return [];
+        });
+        for (const log of logs) {
+          console.log(`[browser-debug] ${log}`);
+        }
+      } catch (_) {}
+
       {
         const liveRawLeads = await readLeadsWithFallback(browser, page);
         const liveNormLeads = liveRawLeads.map(normalizeLead);
-        const liveNoWebsiteLeads = liveNormLeads.filter((lead) => !lead.website || !String(lead.website).trim());
+        const liveNoWebsiteLeads = (job.platform === 'kickstarter' || job.platform === 'apollo')
+          ? liveNormLeads.filter(l => l.email || l.phone || l.facebook || l.instagram || l.twitter || l.linkedin || l.youtube || l.name)
+          : liveNormLeads.filter((lead) => !lead.website || !String(lead.website).trim());
         const signature = `${liveNormLeads.length}:${liveNoWebsiteLeads.length}`;
 
         if (signature !== lastLiveSignature || loopCount % 4 === 0) {
@@ -1672,7 +1747,9 @@ async function runScrapeJob(jobId) {
     // Normalise field names — extension may use different keys
     const normLeads = leads.map(normalizeLead);
 
-    const noWebsiteLeads = normLeads.filter(l => !l.website || !String(l.website).trim());
+    const noWebsiteLeads = (job.platform === 'kickstarter' || job.platform === 'apollo')
+      ? normLeads.filter(l => l.email || l.phone || l.facebook || l.instagram || l.twitter || l.linkedin || l.youtube || l.name)
+      : normLeads.filter(l => !l.website || !String(l.website).trim());
 
     await browser.close();
     browser = null;
@@ -1731,6 +1808,19 @@ async function runScrapeJob(jobId) {
   }
 }
 
+app.post('/api/diagnose', (req, res) => {
+  try {
+    const data = req.body;
+    const filePath = path.join(DEBUG_DIR, 'diagnostics_result.json');
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+    console.log(`[diagnose] Saved diagnostics data to ${filePath}`);
+    res.json({ success: true, filePath });
+  } catch (error) {
+    console.error('[diagnose] Error saving diagnostics:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get('/api/estimate', (req, res) => {
   const { keyword, location, platform, domain } = req.query;
   const normalizedPlatform = normalizePlatformInput(platform, domain);
@@ -1753,7 +1843,11 @@ app.get('/api/estimate', (req, res) => {
 app.post('/api/scrape', (req, res) => {
   const { keyword, location, yelp_domain, search_domain, platform } = req.body;
 
-  if (!keyword || !location) {
+  const requestedDomain = search_domain || yelp_domain || '';
+  const normalizedPlatform = normalizePlatformInput(platform, requestedDomain);
+  const normalizedDomain = normalizeSearchDomain(normalizedPlatform, requestedDomain);
+
+  if (!keyword || (!location && normalizedPlatform !== 'kickstarter' && normalizedPlatform !== 'apollo')) {
     res.status(400).json({ error: 'Keyword and location required' });
     return;
   }
@@ -1769,13 +1863,9 @@ app.post('/api/scrape', (req, res) => {
     return;
   }
 
-  const requestedDomain = search_domain || yelp_domain || '';
-  const normalizedPlatform = normalizePlatformInput(platform, requestedDomain);
-  const normalizedDomain = normalizeSearchDomain(normalizedPlatform, requestedDomain);
-
   const job = createJob({
     keyword: keyword.trim(),
-    location: location.trim(),
+    location: (location || '').trim(),
     platform: normalizedPlatform,
     searchDomain: normalizedDomain
   });
@@ -1863,7 +1953,10 @@ function generateExcelFile(leads, filepath) {
   const wb = new xl.Workbook();
   const ws = wb.addWorksheet('Leads');
 
-  const headers = ['Name', 'Phone', 'Address', 'Category', 'Rating', 'Reviews', 'Latitude', 'Longitude'];
+  const headers = [
+    'Name', 'Phone', 'Address', 'Category', 'Rating', 'Reviews', 'Latitude', 'Longitude',
+    'Website', 'Email', 'Book Title', 'Facebook', 'Instagram', 'Twitter', 'LinkedIn', 'YouTube'
+  ];
   const headerStyle = wb.createStyle({
     font: { bold: true, color: '#FFFFFF', size: 12 },
     fill: { type: 'pattern', patternType: 'solid', fgColor: '#1F4E78', bgColor: '#1F4E78' },
@@ -1883,6 +1976,14 @@ function generateExcelFile(leads, filepath) {
     ws.cell(rowIdx + 2, 6).number(Number(lead.reviews || lead.reviewCount) || 0);
     ws.cell(rowIdx + 2, 7).number(Number(lead.latitude) || 0);
     ws.cell(rowIdx + 2, 8).number(Number(lead.longitude) || 0);
+    ws.cell(rowIdx + 2, 9).string(lead.website || '');
+    ws.cell(rowIdx + 2, 10).string(lead.email || '');
+    ws.cell(rowIdx + 2, 11).string(lead.bookTitle || '');
+    ws.cell(rowIdx + 2, 12).string(lead.facebook || '');
+    ws.cell(rowIdx + 2, 13).string(lead.instagram || '');
+    ws.cell(rowIdx + 2, 14).string(lead.twitter || '');
+    ws.cell(rowIdx + 2, 15).string(lead.linkedin || '');
+    ws.cell(rowIdx + 2, 16).string(lead.youtube || '');
   });
 
   ws.column(1).setWidth(25);
@@ -1893,6 +1994,14 @@ function generateExcelFile(leads, filepath) {
   ws.column(6).setWidth(10);
   ws.column(7).setWidth(12);
   ws.column(8).setWidth(12);
+  ws.column(9).setWidth(30);
+  ws.column(10).setWidth(30);
+  ws.column(11).setWidth(25);
+  ws.column(12).setWidth(25);
+  ws.column(13).setWidth(25);
+  ws.column(14).setWidth(25);
+  ws.column(15).setWidth(25);
+  ws.column(16).setWidth(25);
 
   wb.write(filepath);
 }
